@@ -1,30 +1,57 @@
-const CACHE="checkpoint-v6";
+const CACHE="checkpoint-v7";
 
-self.addEventListener("install", e=>{
+const FILES=[
+"/checkpoint-pwa/",
+"/checkpoint-pwa/index.html",
+"/checkpoint-pwa/style.css",
+"/checkpoint-pwa/app.js",
+"/checkpoint-pwa/manifest.json",
+"/checkpoint-pwa/assets/icon-192.png",
+"/checkpoint-pwa/assets/icon-512.png"
+];
+
+
+self.addEventListener(
+"install",
+e=>{
+
 self.skipWaiting();
 
 e.waitUntil(
-caches.open(CACHE).then(cache=>
-cache.addAll([
-"/",
-"/index.html",
-"/style.css",
-"/app.js",
-"/manifest.json",
-"/assets/icon-192.png",
-"/assets/icon-512.png"
-])
+caches.open(CACHE)
+.then(cache=>
+cache.addAll(FILES)
 )
 );
-});
 
-self.addEventListener("activate", e=>{
-clients.claim();
-});
-
-self.addEventListener("fetch", e=>{
-e.respondWith(
-caches.match(e.request)
-.then(r=>r || fetch(e.request))
+}
 );
-});
+
+
+
+self.addEventListener(
+"activate",
+e=>{
+
+clients.claim();
+
+}
+);
+
+
+
+self.addEventListener(
+"fetch",
+e=>{
+
+e.respondWith(
+caches.match(
+e.request
+)
+.then(
+r=>r || fetch(e.request)
+)
+);
+
+}
+);

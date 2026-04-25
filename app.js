@@ -1,13 +1,13 @@
 if('serviceWorker' in navigator){
 navigator.serviceWorker.register('sw.js');
 }
+
 const WEBHOOK="https://script.google.com/macros/s/AKfycbwp4iVXdi8AA88_1w843atHUD8i9qMYj3D0cyVhL37fiuGC5BpmRQOdoMuCo31iCVmg/exec";
 
 let entradaAbierta=false;
 let historial=[];
 let horaEntrada=null;
 let segundosTotales=0;
-
 
 
 window.onload=function(){
@@ -41,7 +41,7 @@ function actualizarBoton(){
 document.getElementById(
 "mainButton"
 ).innerText=
-entradaAbierta ?
+entradaAbierta?
 "🔴 SALIR":
 "🟢 ENTRAR";
 
@@ -120,11 +120,10 @@ tipo:tipo,
 duracion:duracion,
 total:formatea(
 segundosTotales
-)
+),
+secret:"checkpoint2026"
 })
 }
-).catch(
-e=>console.log(e)
 );
 
 }
@@ -272,11 +271,6 @@ renderHistorial();
 actualizarHoras();
 
 actualizarBoton();
-
-document.getElementById(
-"estado"
-).innerText=
-"Nueva jornada iniciada";
 
 }
 

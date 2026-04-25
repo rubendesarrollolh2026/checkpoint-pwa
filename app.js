@@ -1,13 +1,49 @@
+const PIN="5810";
+
+let autorizado=
+sessionStorage.getItem(
+"autorizado"
+)==="si";
+
+if(!autorizado){
+
+let p=
+prompt(
+"Introduce PIN"
+);
+
+if(p!==PIN){
+
+document.body.innerHTML=
+"<h2>Acceso denegado</h2>";
+
+throw new Error(
+"PIN incorrecto"
+);
+
+}
+
+sessionStorage.setItem(
+"autorizado",
+"si"
+);
+
+}
+
+
+
 if('serviceWorker' in navigator){
 navigator.serviceWorker.register('sw.js');
 }
 
 const WEBHOOK="https://script.google.com/macros/s/AKfycbwp4iVXdi8AA88_1w843atHUD8i9qMYj3D0cyVhL37fiuGC5BpmRQOdoMuCo31iCVmg/exec";
 
+
 let entradaAbierta=false;
 let historial=[];
 let horaEntrada=null;
 let segundosTotales=0;
+
 
 
 window.onload=function(){
@@ -29,7 +65,9 @@ localStorage.getItem("historial")
 )||[];
 
 renderHistorial();
+
 actualizarHoras();
+
 actualizarBoton();
 
 };
@@ -116,8 +154,8 @@ headers:{
 "application/json"
 },
 body:JSON.stringify({
-tipo:tipo,
-duracion:duracion,
+tipo,
+duracion,
 total:formatea(
 segundosTotales
 ),

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CheckPoint</title>
+
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h1>CheckPoint</h1>
+
+<button onclick="fichar()">
+FICHAR
+</button>
+
+<br><br>
+
+<button onclick="resetDia()">
+Nuevo día
+</button>
+
+<p id="estado">
+Sin registros
+</p>
+
+<h2 id="totalHoras">
+Horas hoy: 0 min
+</h2>
+
+<h3>Historial</h3>
+
+<ul id="log"></ul>
+
+<script src="app.js"></script>
+
+</body>
+</html>

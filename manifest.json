@@ -1,8 +1,8 @@
 {
 "name":"CheckPoint",
 "short_name":"CheckPoint",
-"start_url":"/index.html",
-"scope":"/",
+"start_url":"/checkpoint-pwa/",
+"scope":"/checkpoint-pwa/",
 "display":"standalone",
 "background_color":"#ffffff",
 "theme_color":"#202124",

@@ -1,26 +1,15 @@
-const PIN="5810";
+const PIN="2580";
 
 let autorizado=
-sessionStorage.getItem(
-"autorizado"
-)==="si";
+sessionStorage.getItem("autorizado")==="si";
 
 if(!autorizado){
 
-let p=
-prompt(
-"Introduce PIN"
-);
+let p=prompt("Introduce PIN");
 
 if(p!==PIN){
-
-document.body.innerHTML=
-"<h2>Acceso denegado</h2>";
-
-throw new Error(
-"PIN incorrecto"
-);
-
+document.body.innerHTML="<h2>Acceso denegado</h2>";
+throw new Error("PIN");
 }
 
 sessionStorage.setItem(
@@ -31,44 +20,34 @@ sessionStorage.setItem(
 }
 
 
-
 if('serviceWorker' in navigator){
 navigator.serviceWorker.register('sw.js');
 }
 
-const WEBHOOK="https://script.google.com/macros/s/AKfycbwp4iVXdi8AA88_1w843atHUD8i9qMYj3D0cyVhL37fiuGC5BpmRQOdoMuCo31iCVmg/exec";
+
+const WEBHOOK=
+"https://script.google.com/macros/s/AKfycbxe-XZhSXt7_vAOvnOVJk-tFw3cpPRtH62nDjrkZxWz6W2OVRFalyW-a2kTw1luLZDjvA/exec";
 
 
 let entradaAbierta=false;
-let historial=[];
 let horaEntrada=null;
-let segundosTotales=0;
 
 
 
 window.onload=function(){
 
 entradaAbierta=
-localStorage.getItem("entradaAbierta")==="true";
+localStorage.getItem(
+"entradaAbierta"
+)==="true";
 
 horaEntrada=
-localStorage.getItem("horaEntrada");
-
-segundosTotales=
-parseInt(
-localStorage.getItem("segundosTotales")
-)||0;
-
-historial=
-JSON.parse(
-localStorage.getItem("historial")
-)||[];
-
-renderHistorial();
-
-actualizarHoras();
+localStorage.getItem(
+"horaEntrada"
+);
 
 actualizarBoton();
+mostrarEstado();
 
 };
 
@@ -87,6 +66,27 @@ entradaAbierta?
 
 
 
+function mostrarEstado(){
+
+if(entradaAbierta){
+
+document.getElementById(
+"estado"
+).innerText=
+"Jornada abierta desde "
++
+new Date(
+parseInt(horaEntrada)
+).toLocaleTimeString(
+'es-ES'
+);
+
+}
+
+}
+
+
+
 function guardar(){
 
 localStorage.setItem(
@@ -99,50 +99,54 @@ localStorage.setItem(
 horaEntrada
 );
 
-localStorage.setItem(
-"segundosTotales",
-segundosTotales
-);
-
-localStorage.setItem(
-"historial",
-JSON.stringify(historial)
-);
-
 }
 
 
 
 function formatea(seg){
 
-let h=
-Math.floor(seg/3600);
+let h=Math.floor(seg/3600);
+let m=Math.floor((seg%3600)/60);
+let s=seg%60;
 
-let m=
-Math.floor(
-(seg%3600)/60
-);
-
-let s=
-seg%60;
-
-return String(h)
-.padStart(2,"0")
-+":"+
-String(m)
-.padStart(2,"0")
-+":"+
-String(s)
-.padStart(2,"0");
+return String(h).padStart(2,"0")
++":"
++String(m).padStart(2,"0")
++":"
++String(s).padStart(2,"0");
 
 }
 
 
 
-function enviarSheets(
-tipo,
-duracion
-){
+function diaTexto(){
+
+let dias=[
+"Domingo","Lunes","Martes",
+"Miércoles","Jueves",
+"Viernes","Sábado"
+];
+
+return dias[
+new Date().getDay()
+];
+
+}
+
+
+
+function horaCompleta(){
+
+return new Date()
+.toLocaleString(
+'es-ES'
+);
+
+}
+
+
+
+function enviar(datos){
 
 fetch(
 WEBHOOK,
@@ -153,65 +157,11 @@ headers:{
 "Content-Type":
 "application/json"
 },
-body:JSON.stringify({
-tipo,
-duracion,
-total:formatea(
-segundosTotales
-),
-secret:"checkpoint2026"
-})
+body:JSON.stringify(
+datos
+)
 }
 );
-
-}
-
-
-
-function actualizarHoras(){
-
-document.getElementById(
-"totalHoras"
-).innerText=
-"Hoy: "+
-formatea(
-segundosTotales
-);
-
-}
-
-
-
-function horaTexto(){
-
-return new Date()
-.toLocaleTimeString(
-'es-ES'
-);
-
-}
-
-
-
-function renderHistorial(){
-
-let lista=
-document.getElementById(
-"log"
-);
-
-lista.innerHTML="";
-
-historial.forEach(item=>{
-
-let li=
-document.createElement("li");
-
-li.textContent=item;
-
-lista.appendChild(li);
-
-});
 
 }
 
@@ -219,68 +169,66 @@ lista.appendChild(li);
 
 function fichar(){
 
-let ahora=
-new Date();
+let ahora=new Date();
 
-let msg="";
 
 if(!entradaAbierta){
 
 horaEntrada=
 ahora.getTime();
 
-msg=
-"🟢 Entrada "+
-horaTexto();
-
 entradaAbierta=true;
 
-enviarSheets(
-"Entrada",
-"00:00:00"
-);
+guardar();
+
+enviar({
+tipo:"entrada",
+dia:diaTexto(),
+entrada:horaCompleta(),
+secret:"checkpoint2026"
+});
+
+mostrarEstado();
+actualizarBoton();
+
+return;
 
 }
-else{
+
+
 
 let segundos=
 Math.floor(
-(ahora.getTime()-horaEntrada)
-/1000
+(
+ahora.getTime()-horaEntrada
+)/1000
 );
 
-segundosTotales+=segundos;
+let comida=
+confirm(
+"¿Descontar comida?"
+)?
+"Sí":"No";
 
-msg=
-"🔴 Salida "
-+horaTexto()
-+" ("
-+formatea(segundos)
-+")";
+
+enviar({
+tipo:"salida",
+salida:horaCompleta(),
+horas:formatea(segundos),
+comida:comida,
+secret:"checkpoint2026"
+});
+
 
 entradaAbierta=false;
-
 horaEntrada=null;
 
-enviarSheets(
-"Salida",
-formatea(segundos)
-);
-
-}
-
+guardar();
 
 document.getElementById(
 "estado"
-).innerText=msg;
-
-historial.unshift(msg);
-
-guardar();
-
-renderHistorial();
-
-actualizarHoras();
+).innerText=
+"✅ Jornada guardada";
 
 actualizarBoton();
 
@@ -288,28 +236,59 @@ actualizarBoton();
 
 
 
-function resetDia(){
+function parteDiario(){
 
-if(confirm(
-"¿Reiniciar jornada?"
-)){
+let companero=
+prompt("Compañero:");
+if(!companero)return;
 
-historial=[];
 
-segundosTotales=0;
+let vehiculo=
+prompt("Vehículo:");
+if(!vehiculo)return;
 
-entradaAbierta=false;
 
-horaEntrada=null;
+let trabajo=
+prompt(
+"Trabajo realizado:"
+);
+if(!trabajo)return;
 
-guardar();
 
-renderHistorial();
+let materiales=
+prompt(
+"Materiales:"
+)||"";
 
-actualizarHoras();
 
-actualizarBoton();
+let obs=
+prompt(
+"Observaciones:"
+)||"";
 
-}
+
+enviar({
+
+tipo:"parte",
+
+fecha:horaCompleta(),
+
+companero:companero,
+
+vehiculo:vehiculo,
+
+trabajo:trabajo,
+
+materiales:materiales,
+
+obs:obs,
+
+secret:"checkpoint2026"
+
+});
+
+alert(
+"Parte guardado"
+);
 
 }
